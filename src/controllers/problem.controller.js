@@ -61,7 +61,7 @@ const getAllProblems = asyncHandler(async (req, res) => {
 
     const problems =
         await Problem.find()
-            .select("-__v");//mongoDB ka version field hide kar do
+            .select("-__v -testCases");//mongoDB ka version field hide kar do
 
     return res.status(200).json(
         new ApiResponse(
