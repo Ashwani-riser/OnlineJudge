@@ -18,21 +18,30 @@ export const judgeSubmission = async (submissionId) => {
         submission.problemId
     );
 
-//     const testCases = await TestCase.find({
-//     problemId: problem._id
-//    });
-
     if (!problem) {
         throw new Error("Problem not found");
     }
 
     let verdict = "Accepted";
+    let maxExecutionTime = 0;
 
     for (const testCase of problem.testCases) {
+
+        const startTime = Date.now();
 
         const result = await runCpp(
             submission.sourceCode,
             testCase.input
+        );
+
+        const endTime = Date.now();
+
+        const executionTime =
+            endTime - startTime;
+
+        maxExecutionTime = Math.max(
+            maxExecutionTime,
+            executionTime
         );
 
         if (!result.success) {
@@ -54,6 +63,8 @@ export const judgeSubmission = async (submissionId) => {
     }
 
     submission.verdict = verdict;
+    submission.executionTime =
+        maxExecutionTime;
 
     await submission.save();
 

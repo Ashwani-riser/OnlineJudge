@@ -42,7 +42,10 @@ export const runCpp = async (sourceCode, input) => {
     try {
 
         const { stdout } = await execAsync(
-            `cmd /c "${exePath} < ${inputPath}"`
+            `cmd /c "${exePath} < ${inputPath}"`,
+            {
+                timeout: 2000
+            }
         );
 
         return {
@@ -51,6 +54,16 @@ export const runCpp = async (sourceCode, input) => {
         };
 
     } catch (error) {
+
+        if (
+            error.killed ||
+            error.signal === "SIGTERM"
+        ) {
+            return {
+                success: false,
+                type: "Time Limit Exceeded"
+            };
+        }
 
         return {
             success: false,
