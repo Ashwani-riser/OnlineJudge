@@ -70,3 +70,4 @@ export const judgeSubmission = async (submissionId) => {
 
     return verdict;
 };
+// initialy hum veridict ko Accepted assume kar liya phir humne ussa const result pa chalaya agr waha compillation error ya runtime error ya time limit exceed hua to humne verdict ko uss type me change kar diya aur break kar diya loop ko agr output wrong hua to humne verdict ko wrong answer me change kar diya aur break kar diya loop ko.

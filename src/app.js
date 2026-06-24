@@ -6,6 +6,7 @@ import authRouter from "./routes/auth.routes.js";
 import problemRouter from "./routes/problem.routes.js";
 import testcaseRouter from "./routes/testcase.routes.js";
 import submissionRouter from "./routes/submission.routes.js";
+import contestRouter from "./routes/contest.route.js";
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,8 @@ app.use("/api/v1/users", authRouter);
 app.use("/api/v1/problems", problemRouter);
 app.use("/api/v1/testcases", testcaseRouter);
 app.use("/api/v1/submissions", submissionRouter);
+app.use("/api/v1/contests",contestRouter);
+
 
 app.use((err, req, res, next)=>{
     return res.status(err.statusCode || 500).json({
