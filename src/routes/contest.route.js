@@ -5,7 +5,7 @@ import {
     getAllContests,
     getContestById,
     updateContest,
-    // deleteContest,
+    deleteContest,
     // registerContest,
     // getLeaderboard
 } from "../controllers/contest.controller.js";
@@ -22,7 +22,7 @@ router.route("/")
  router.route("/:contestId")
      .get(getContestById)
      .patch(verifyJWT, verifyAdmin, updateContest)
-//     .delete(verifyJWT, verifyAdmin, deleteContest);
+     .delete(verifyJWT, verifyAdmin, deleteContest);
 
 // router.route("/:contestId/register")
 //     .post(verifyJWT, registerContest);

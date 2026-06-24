@@ -78,7 +78,6 @@ const createContest = asyncHandler(async (req, res) => {
     );
 });
 
-
 const getAllContests = asyncHandler(async (req, res) => {
 
     const contests = await Contest.find()
@@ -103,7 +102,6 @@ const getAllContests = asyncHandler(async (req, res) => {
         )
     );
 });
-
 
 const getContestById = asyncHandler(async (req, res) => {
 
@@ -148,6 +146,7 @@ const getContestById = asyncHandler(async (req, res) => {
         )
     );
 });
+
 const updateContest = asyncHandler(async (req, res) => {
 // Rules
 // ✅ Admin only
@@ -259,6 +258,30 @@ const updateContest = asyncHandler(async (req, res) => {
         )
     );
 });
+const deleteContest = asyncHandler(async (req, res) => {
+
+    const contest = req.contest;
+
+    const status = getContestStatus(contest);
+
+    if (status !== "UPCOMING") {
+        throw new ApiError(
+            400,
+            "Only upcoming contests can be deleted"
+        );
+    }
+
+    await contest.deleteOne();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {},
+            "Contest deleted successfully"
+        )
+    );
+});
 
 
-export { createContest, getAllContests, getContestById, updateContest };
+
+export { createContest, getAllContests, getContestById, updateContest, deleteContest };
