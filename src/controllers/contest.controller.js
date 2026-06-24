@@ -148,5 +148,117 @@ const getContestById = asyncHandler(async (req, res) => {
         )
     );
 });
+const updateContest = asyncHandler(async (req, res) => {
+// Rules
+// ✅ Admin only
 
-export { createContest, getAllContests, getContestById };
+// ✅ Contest exists
+
+// ✅ Contest UPCOMING hona chahiye
+
+// ❌ RUNNING contest update nahi hoga
+
+// ❌ ENDED contest update nahi hoga
+
+// ✅ startTime < endTime
+
+// ✅ Problem ids valid honi chahiye
+
+    const { contestId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(contestId)) {
+        throw new ApiError(400, "Invalid contest id");
+    }
+
+    const contest = await Contest.findById(contestId);
+
+    if (!contest) {
+        throw new ApiError(
+            404,
+            "Contest not found"
+        );
+    }
+
+    const status =
+        getContestStatus(contest);
+
+    if (status !== "UPCOMING") {
+        throw new ApiError(
+            400,
+            "Contest already started"
+        );
+    }
+
+    const {
+        title,
+        description,
+        startTime,
+        endTime,
+        problems,
+        isPublic
+    } = req.body;
+
+    const updatedStart =
+        startTime
+            ? new Date(startTime)
+            : contest.startTime;
+
+    const updatedEnd =
+        endTime
+            ? new Date(endTime)
+            : contest.endTime;
+
+    if (updatedStart >= updatedEnd) {
+        throw new ApiError(
+            400,
+            "End time must be after start time"
+        );
+    }
+
+    if (problems) {
+
+        const validProblems =
+            await Problem.countDocuments({
+                _id: { $in: problems }
+            });
+
+        if (
+            validProblems !== problems.length
+        ) {
+            throw new ApiError(
+                400,
+                "Invalid problem ids"
+            );
+        }
+
+        contest.problems = problems;
+    }
+
+    if (title !== undefined)
+        contest.title = title;
+
+    if (description !== undefined)
+        contest.description = description;
+
+    if (startTime !== undefined)
+        contest.startTime = startTime;
+
+    if (endTime !== undefined)
+        contest.endTime = endTime;
+
+    if (isPublic !== undefined)
+        contest.isPublic = isPublic;
+
+    await contest.save();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            contest,
+            "Contest updated successfully"
+        )
+    );
+});
+
+
+export { createContest, getAllContests, getContestById, updateContest };

@@ -4,7 +4,7 @@ import {
     createContest,
     getAllContests,
     getContestById,
-    // updateContest,
+    updateContest,
     // deleteContest,
     // registerContest,
     // getLeaderboard
@@ -21,7 +21,7 @@ router.route("/")
 
  router.route("/:contestId")
      .get(getContestById)
-//     .patch(verifyJWT, verifyAdmin, updateContest)
+     .patch(verifyJWT, verifyAdmin, updateContest)
 //     .delete(verifyJWT, verifyAdmin, deleteContest);
 
 // router.route("/:contestId/register")
