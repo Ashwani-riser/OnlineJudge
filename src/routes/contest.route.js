@@ -2,8 +2,8 @@ import { Router } from "express";
 
 import {
     createContest,
-    // getAllContests,
-    // getContestById,
+    getAllContests,
+    getContestById,
     // updateContest,
     // deleteContest,
     // registerContest,
@@ -16,11 +16,11 @@ import { verifyAdmin } from "../middlewares/admin.middleware.js";
 const router = Router();
 
 router.route("/")
-    .post(verifyJWT, verifyAdmin, createContest);
-    // .get(getAllContests);
+    .post(verifyJWT, verifyAdmin, createContest)
+    .get(getAllContests);
 
-// router.route("/:contestId")
-//     .get(getContestById)
+ router.route("/:contestId")
+     .get(getContestById)
 //     .patch(verifyJWT, verifyAdmin, updateContest)
 //     .delete(verifyJWT, verifyAdmin, deleteContest);
 

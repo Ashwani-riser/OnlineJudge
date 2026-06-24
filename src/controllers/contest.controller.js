@@ -1,9 +1,12 @@
+import mongoose from "mongoose";
 import { Contest } from "../models/contest.model.js";
 import { Problem } from "../models/problem.model.js";
 
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+
+import { getContestStatus } from "../utils/contestStatus.js";
 
 const createContest = asyncHandler(async (req, res) => {
 
@@ -75,4 +78,75 @@ const createContest = asyncHandler(async (req, res) => {
     );
 });
 
-export { createContest };
+
+const getAllContests = asyncHandler(async (req, res) => {
+
+    const contests = await Contest.find()
+        .populate("createdBy", "username")
+        .sort({ startTime: 1 });
+
+    const contestsWithStatus = contests.map((contest) => {
+
+        const contestObj = contest.toObject();
+
+        contestObj.status =
+            getContestStatus(contest);
+
+        return contestObj;
+    });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            contestsWithStatus,
+            "Contests fetched successfully"
+        )
+    );
+});
+
+
+const getContestById = asyncHandler(async (req, res) => {
+
+    const { contestId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(contestId)) {
+        throw new ApiError(400, "Invalid contest id");
+    }
+
+    const contest = await Contest.findById(contestId)
+        .populate(
+            "createdBy",
+            "username fullName"
+        )
+        .populate({
+            path: "problems",
+            select:
+                "title difficulty tags"
+        });
+
+    if (!contest) {
+        throw new ApiError(
+            404,
+            "Contest not found"
+        );
+    }
+
+    const contestObj =
+        contest.toObject();
+
+    contestObj.status =
+        getContestStatus(contest);
+
+    contestObj.participantCount =
+        contest.participants.length;
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            contestObj,
+            "Contest fetched successfully"
+        )
+    );
+});
+
+export { createContest, getAllContests, getContestById };
