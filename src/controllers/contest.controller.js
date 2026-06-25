@@ -281,7 +281,58 @@ const deleteContest = asyncHandler(async (req, res) => {
         )
     );
 });
+const registerContest = asyncHandler(async (req, res) => {
+
+    const contest = req.contest;//middlewre se contest ko fetch kar liya
+
+    if (req.user.role === "admin") {
+        throw new ApiError(
+            403,
+            "Admin cannot register for contest"
+        );
+    }
+
+    if (!contest.isPublic) {
+        throw new ApiError(
+            403,
+            "This contest is private"
+        );
+    }
+
+    const status = getContestStatus(contest);//UPCOMING, RUNNING, ENDED
+
+    if (status !== "UPCOMING") {
+        throw new ApiError(
+            400,
+            "Registration is closed"
+        );
+    }
+
+    const alreadyRegistered = contest.participants.some(
+        participant =>
+            participant.toString() === req.user._id.toString()
+    );
+
+    if (alreadyRegistered) {
+        throw new ApiError(
+            400,
+            "You are already registered"
+        );
+    }
+
+    contest.participants.push(req.user._id);
+
+    await contest.save();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            contest,
+            "Contest registration successful"
+        )
+    );
+});
 
 
 
-export { createContest, getAllContests, getContestById, updateContest, deleteContest };
+export { createContest, getAllContests, getContestById, updateContest, deleteContest, registerContest };
