@@ -332,7 +332,62 @@ const registerContest = asyncHandler(async (req, res) => {
         )
     );
 });
+const submitContestSolution = asyncHandler(async (req, res) => {
+
+    const contest = req.contest;
+
+    const status = getContestStatus(contest);
+
+    if (status !== "RUNNING") {
+        throw new ApiError(400, "Contest is not running");
+    }
+
+    const { language, sourceCode } = req.body;
+
+    if (!language || !sourceCode) {
+        throw new ApiError(
+            400,
+            "Language and source code are required"
+        );
+    }
+
+    // Check problem belongs to contest
+    const isProblemInContest = contest.problems.some(
+        (problem) => problem.toString() === req.params.problemId
+    );
+
+    if (!isProblemInContest) {
+        throw new ApiError(
+            404,
+            "Problem does not belong to this contest"
+        );
+    }
+
+    // Create Submission
+    const submission = await Submission.create({
+        userId: req.user._id,
+        problemId: req.params.problemId,
+        contestId: contest._id,
+        language,
+        sourceCode,
+        verdict: "Pending"
+    });
+
+    // Reuse existing Judge Engine
+    await judgeSubmission(submission._id);
+    
+    // Fetch the updated submission after judging
+    const updatedSubmission = await Submission.findById(submission._id);
+    
+    return res.status(201).json(
+        new ApiResponse(
+            201,
+            updatedSubmission,
+            "Submission judged successfully"
+        )
+    );
+});
 
 
 
-export { createContest, getAllContests, getContestById, updateContest, deleteContest, registerContest };
+export { createContest, getAllContests, getContestById, updateContest, deleteContest, registerContest, submitContestSolution };

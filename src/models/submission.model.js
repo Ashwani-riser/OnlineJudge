@@ -42,7 +42,7 @@ const submissionSchema = new mongoose.Schema(
             type: Number,
             default: 0
         },
-        contestId: {
+        contestId: {// pata chal jayega submission contest ka hai ya practice ka.
             type: mongoose.Schema.Types.ObjectId,
             ref: "Contest",
             default: null
