@@ -32,7 +32,7 @@ router.route("/")
      .delete(verifyJWT, verifyAdmin, deleteContest);
 
  router.route("/:contestId/register")
-     .post(verifyJWT, registerContest);
+     .post(verifyJWT,validateContest,registerContest);
 
 router.post(
     "/:contestId/problems/:problemId/submit",

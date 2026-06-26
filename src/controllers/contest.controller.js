@@ -88,9 +88,17 @@ const getAllContests = asyncHandler(async (req, res) => {
 
         const contestObj = contest.toObject();
 
-        contestObj.status =
-            getContestStatus(contest);
-
+        contestObj.status =getContestStatus(contest);
+            
+        delete contestObj.problems;
+        contestObj.participantCount = contest.participants.length;
+        // Optional: participants array bhi hide kar do
+        delete contestObj.participants;
+        delete contestObj.createdBy;
+        delete contestObj.isPublic;
+        delete contestObj.createdAt;
+        delete contestObj.updatedAt;
+        delete contestObj.__v;
         return contestObj;
     });
 
@@ -137,6 +145,13 @@ const getContestById = asyncHandler(async (req, res) => {
 
     contestObj.participantCount =
         contest.participants.length;
+    
+    // if (
+    //    contestObj.status === "UPCOMING" &&
+    //    req.user?.role !== "ADMIN"
+    // ){
+    // delete contestObj.problems;
+    // }
 
     return res.status(200).json(
         new ApiResponse(

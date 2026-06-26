@@ -30,7 +30,7 @@ const contestSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }],
-  createdBy: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
