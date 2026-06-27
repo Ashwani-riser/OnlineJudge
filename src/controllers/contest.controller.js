@@ -7,6 +7,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 import { getContestStatus } from "../utils/contestStatus.js";
+import getLeaderboard from "../services/leaderboard.service.js";
 
 const createContest = asyncHandler(async (req, res) => {
 
@@ -403,6 +404,18 @@ const submitContestSolution = asyncHandler(async (req, res) => {
     );
 });
 
+const getContestLeaderboard = asyncHandler(async (req, res) => {
+
+    const leaderboard = await getLeaderboard(req.params.contestId);
+
+    return res.status(200).json({
+        success: true,
+        message: "Leaderboard fetched successfully",
+        data: leaderboard
+    });
+
+});
 
 
-export { createContest, getAllContests, getContestById, updateContest, deleteContest, registerContest, submitContestSolution };
+
+export { createContest, getAllContests, getContestById, updateContest, deleteContest, registerContest, submitContestSolution, getContestLeaderboard };

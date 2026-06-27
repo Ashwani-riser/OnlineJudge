@@ -8,7 +8,7 @@ import {
     deleteContest,
     registerContest,
     submitContestSolution,
-    // getLeaderboard
+    getContestLeaderboard
 } from "../controllers/contest.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -42,7 +42,10 @@ router.post(
     submitContestSolution
 );    
 
-// router.route("/:contestId/leaderboard")
-//     .get(getLeaderboard);
+router.get(
+    "/:contestId/leaderboard",
+    validateContest,
+    getContestLeaderboard
+);
 
 export default router;

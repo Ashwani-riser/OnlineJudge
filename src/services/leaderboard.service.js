@@ -1,10 +1,10 @@
 // src/services/leaderboard.service.js
 
 import mongoose from "mongoose";
-import Contest from "../models/contest.model.js";
-import Submission from "../models/submission.model.js";
+import { Contest } from "../models/contest.model.js";
+import { Submission } from "../models/submission.model.js";
 import calculatePenalty from "../helpers/penalty.helper.js";
-import ApiError from "../utils/ApiError.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const getLeaderboard = async (contestId) => {
 
