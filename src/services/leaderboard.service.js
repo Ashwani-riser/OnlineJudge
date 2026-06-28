@@ -4,13 +4,14 @@ import mongoose from "mongoose";
 import { Contest } from "../models/contest.model.js";
 import { Submission } from "../models/submission.model.js";
 import calculatePenalty from "../helpers/penalty.helper.js";
-import { ApiError } from "../utils/ApiError.js";
+import {ApiError} from "../utils/ApiError.js";
 
 const getLeaderboard = async (contestId) => {
 
     // Fetch contest
     const contest = await Contest.findById(contestId)
-        .select("startTime problems");
+        .select("startTime problems")
+        .populate("problems", "title slug");
 
     if (!contest) {
         throw new ApiError(404, "Contest not found");
@@ -19,17 +20,17 @@ const getLeaderboard = async (contestId) => {
     // Aggregate submissions grouped by user
     const users = await Submission.aggregate([
         {
-            $match: {//isi contest ka submission hi hume chahiye
+            $match: {
                 contestId: new mongoose.Types.ObjectId(contestId)
             }
         },
         {
-            $sort: {//oldest submission ko pehle
+            $sort: {
                 createdAt: 1
             }
         },
         {
-            $group: {//user ke hisab se submissions group karo
+            $group: {
                 _id: "$userId",
                 submissions: {
                     $push: {
@@ -49,7 +50,7 @@ const getLeaderboard = async (contestId) => {
             }
         },
         {
-            $unwind: "$user" //Lookup array return karta hai.
+            $unwind: "$user"
         },
         {
             $project: {
@@ -63,11 +64,20 @@ const getLeaderboard = async (contestId) => {
         }
     ]);
 
-    // Contest problem order
-    const problemOrder = new Map();
+    // Contest problem metadata
+    const problemMap = new Map();
 
-    contest.problems.forEach((problemId, index) => {
-        problemOrder.set(problemId.toString(), index);
+    contest.problems.forEach((problem, index) => {
+
+        const code = String.fromCharCode(65 + index); // A, B, C...
+
+        problemMap.set(problem._id.toString(), {
+            order: index,
+            code,
+            title: problem.title,
+            slug: problem.slug
+        });
+
     });
 
     const leaderboard = [];
@@ -79,14 +89,30 @@ const getLeaderboard = async (contestId) => {
             contest.startTime
         );
 
-        // Sort problem-wise results according to contest problem order
+        // Add problem details
+        stats.results = stats.results.map(result => {
+
+            const problem = problemMap.get(result.problemId);
+
+            return {
+                ...result,
+                code: problem?.code,
+                title: problem?.title,
+                slug: problem?.slug
+            };
+
+        });
+
+        // Sort according to contest problem order
         stats.results.sort((a, b) => {
 
             const orderA =
-                problemOrder.get(a.problemId) ?? Number.MAX_SAFE_INTEGER;
+                problemMap.get(a.problemId)?.order ??
+                Number.MAX_SAFE_INTEGER;
 
             const orderB =
-                problemOrder.get(b.problemId) ?? Number.MAX_SAFE_INTEGER;
+                problemMap.get(b.problemId)?.order ??
+                Number.MAX_SAFE_INTEGER;
 
             return orderA - orderB;
         });
@@ -98,6 +124,7 @@ const getLeaderboard = async (contestId) => {
             lastAcTime: stats.lastAcTime,
             results: stats.results
         });
+
     }
 
     // Codeforces sorting
@@ -113,9 +140,10 @@ const getLeaderboard = async (contestId) => {
             return a.lastAcTime - b.lastAcTime;
 
         return a.user.username.localeCompare(b.user.username);
+
     });
 
-    // Rank calculation (Codeforces style)
+    // Rank calculation
     let previous = null;
 
     for (let i = 0; i < leaderboard.length; i++) {
@@ -126,20 +154,26 @@ const getLeaderboard = async (contestId) => {
             leaderboard[i].penalty === previous.penalty &&
             leaderboard[i].lastAcTime === previous.lastAcTime
         ) {
+
             leaderboard[i].rank = previous.rank;
+
         } else {
+
             leaderboard[i].rank = i + 1;
+
         }
 
         previous = leaderboard[i];
+
     }
 
-    // Remove internal field before sending response
+    // Remove internal field
     leaderboard.forEach(user => {
         delete user.lastAcTime;
     });
 
     return leaderboard;
+
 };
 
 export default getLeaderboard;

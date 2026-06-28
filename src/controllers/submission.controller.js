@@ -1,64 +1,29 @@
-import { Submission } from "../models/submission.model.js";
-import { Problem } from "../models/problem.model.js";
-
-import { judgeSubmission } from "../judge/judgeSubmission.js";
-
+import * as submissionService from "../services/submission.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+
 const createSubmission = asyncHandler(async (req, res) => {
-
-    const {
-        problemId,
-        language,
-        sourceCode
-    } = req.body;
-
-    const problem = await Problem.findById(
-        problemId
+    //  req leta hai
+    //  service call karta hai
+    //   response bhejta hai
+    const submission = await submissionService.createSubmission(
+        req.user,
+        req.body
     );
 
-    if (!problem) {
-        throw new ApiError(
-            404,
-            "Problem not found"
-        );
-    }
-    
-    const submission =
-        await Submission.create({
-            userId: req.user._id,
-            problemId,
-            language,
-            sourceCode,
-            verdict: "Pending"
-        });
-
-
-    await judgeSubmission(submission._id);
-
-    const updatedSubmission=await Submission.findById(submission._id);
-    
-
     return res.status(201).json(
-    new ApiResponse(
-        201,
-        updatedSubmission,
-        "Submission judged successfully"
-    )
-);
-});                                                                                                                                                                                                                                                                                                                                                                                 
-
+        new ApiResponse(
+            201,
+            submission,
+            "Submission judged successfully"
+        )
+    );
+});                                                                                                                                                                                                                                                                                                                                                                                
 const getMySubmissions = asyncHandler(async (req, res) => {
 
     const submissions =
-        await Submission.find({
-            userId: req.user._id
-        })
-        .select("-sourceCode")
-        .populate("problemId", "title")
-        .sort({ createdAt: -1 });
+        await submissionService.getMySubmissions(req.user);
 
     return res.status(200).json(
         new ApiResponse(
@@ -67,9 +32,47 @@ const getMySubmissions = asyncHandler(async (req, res) => {
             "Submissions fetched successfully"
         )
     );
+
 });
+
+const getAllSubmissions = asyncHandler(async (req, res) => {
+
+    const result = await submissionService.getAllSubmissions(
+        req.user,
+        req.query
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            result,
+            "Submissions fetched successfully"
+        )
+    );
+
+});
+
+const getSubmissionById = asyncHandler(async (req, res) => {
+
+    const submission = await submissionService.getSubmissionById(
+        req.params.submissionId,
+        req.user
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            submission,
+            "Submission fetched successfully"
+        )
+    );
+
+});
+
 
 export {
     createSubmission,
-    getMySubmissions
+    getMySubmissions,
+    getAllSubmissions,
+    getSubmissionById
 };
