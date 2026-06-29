@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { registerUser ,loginUser,getCurrentUser} from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { authLimiter } from "../middlewares/rateLimit.middleware.js";
 const router = Router();
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/register",authLimiter, registerUser);
+router.post("/login",  authLimiter, loginUser);
 router.get("/currentUser", verifyJWT, getCurrentUser);
 
 export default router;

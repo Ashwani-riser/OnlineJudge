@@ -8,6 +8,7 @@ import {
 } from "../controllers/submission.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { submissionLimiter } from "../middlewares/rateLimit.middleware.js";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const router = Router();
 router.post(
     "/",
     verifyJWT,
+    submissionLimiter,
     createSubmission
 );
 
