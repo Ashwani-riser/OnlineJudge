@@ -10,9 +10,18 @@ import contestRouter from "./routes/contest.route.js";
 import { apiLimiter } from "./middlewares/rateLimit.middleware.js";
 import helmetMiddleware from "./middlewares/helmet.middleware.js";
 
+import morganMiddleware from "./middlewares/morgan.middleware.js";
+
 const app = express();
-app.disable("x-powered-by");
+app.disable("x-powered-by");//response ma "Express, ye header mat bhejna."
+
 app.use(helmetMiddleware);
+// app.use((req, res, next) => {
+//     console.log("🔥 Middleware Hit");
+//     next();
+// });
+
+app.use(morganMiddleware);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
