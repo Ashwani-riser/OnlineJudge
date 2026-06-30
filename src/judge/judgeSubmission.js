@@ -1,5 +1,6 @@
 import { Submission } from "../models/submission.model.js";
 import { Problem } from "../models/problem.model.js";
+import { TestCase } from "../models/testcase.model.js";
 
 import { runCpp } from "./runCpp.js";
 import { compareOutput } from "./compareOutput.js";
@@ -22,10 +23,15 @@ export const judgeSubmission = async (submissionId) => {
         throw new Error("Problem not found");
     }
 
+    const testCases = await TestCase.find({
+        problemId: problem._id,
+        isHidden: true
+    });
+
     let verdict = "Accepted";
     let maxExecutionTime = 0;
 
-    for (const testCase of problem.testCases) {
+    for (const testCase of testCases) {
 
         const startTime = Date.now();
 
@@ -52,7 +58,7 @@ export const judgeSubmission = async (submissionId) => {
 
         const isCorrect = compareOutput(
             result.output,
-            testCase.output
+            testCase.expectedOutput
         );
 
         if (!isCorrect) {

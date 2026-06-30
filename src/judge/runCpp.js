@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { promisify } from "util";
 import { exec } from "child_process";
 
@@ -7,7 +8,7 @@ const execAsync = promisify(exec);
 
 export const runCpp = async (sourceCode, input) => {
 
-    const jobId = Date.now();
+    const jobId = crypto.randomUUID();
 
     const tempDir = "temp";
 
@@ -22,6 +23,24 @@ export const runCpp = async (sourceCode, input) => {
     fs.writeFileSync(codePath, sourceCode);
     fs.writeFileSync(inputPath, input);
 
+    const cleanup = () => {
+        try {
+            if (fs.existsSync(codePath)) {
+                fs.unlinkSync(codePath);
+            }
+
+            if (fs.existsSync(inputPath)) {
+                fs.unlinkSync(inputPath);
+            }
+
+            if (fs.existsSync(exePath)) {
+                fs.unlinkSync(exePath);
+            }
+        } catch (err) {
+            console.error("Cleanup Error:", err.message);
+        }
+    };
+
     // Compile Phase
     try {
 
@@ -30,6 +49,8 @@ export const runCpp = async (sourceCode, input) => {
         );
 
     } catch (error) {
+
+        cleanup();
 
         return {
             success: false,
@@ -48,12 +69,16 @@ export const runCpp = async (sourceCode, input) => {
             }
         );
 
+        cleanup();
+
         return {
             success: true,
             output: stdout.trim()
         };
 
     } catch (error) {
+
+        cleanup();
 
         if (
             error.killed ||

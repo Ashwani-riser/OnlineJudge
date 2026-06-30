@@ -5,20 +5,26 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createTestCase = asyncHandler(async (req, res) => {
-
     const {
         problemId,
         input,
         expectedOutput,
-        isHidden
+        isHidden = true
     } = req.body;
 
+    // Validation
+    if (!problemId || !input || !expectedOutput) {
+        throw new ApiError(400, "All fields are required");
+    }
+
+    // Check if problem exists
     const problem = await Problem.findById(problemId);
 
     if (!problem) {
         throw new ApiError(404, "Problem not found");
     }
 
+    // Create testcase
     const testCase = await TestCase.create({
         problemId,
         input,
@@ -36,12 +42,16 @@ const createTestCase = asyncHandler(async (req, res) => {
 });
 
 const getProblemTestCases = asyncHandler(async (req, res) => {
-
     const { problemId } = req.params;
 
-    const testCases = await TestCase.find({
-        problemId
-    });
+    // Check if problem exists
+    const problem = await Problem.findById(problemId);
+
+    if (!problem) {
+        throw new ApiError(404, "Problem not found");
+    }
+
+    const testCases = await TestCase.find({ problemId });
 
     return res.status(200).json(
         new ApiResponse(
