@@ -45,6 +45,11 @@ const submissionSchema = new mongoose.Schema(
             default: 0
         },
 
+        compileError: {
+            type: String,
+            default: null
+        },
+
         contestId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Contest",

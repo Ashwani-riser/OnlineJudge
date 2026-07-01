@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import { TestCase } from "../models/testcase.model.js";
 import { Problem } from "../models/problem.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -16,7 +18,12 @@ const createTestCase = asyncHandler(async (req, res) => {
     if (!problemId || !input || !expectedOutput) {
         throw new ApiError(400, "All fields are required");
     }
-
+    
+    
+     if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        throw new ApiError(400, "Invalid Problem ID");
+    }
+    
     // Check if problem exists
     const problem = await Problem.findById(problemId);
 
@@ -43,9 +50,13 @@ const createTestCase = asyncHandler(async (req, res) => {
 
 const getProblemTestCases = asyncHandler(async (req, res) => {
     const { problemId } = req.params;
-
+    
+    
+     if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        throw new ApiError(400, "Invalid Problem ID");
+    }
     // Check if problem exists
-    const problem = await Problem.findById(problemId);
+     const problem = await Problem.findById(problemId);
 
     if (!problem) {
         throw new ApiError(404, "Problem not found");

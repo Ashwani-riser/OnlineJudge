@@ -49,15 +49,27 @@ export const runCpp = async (sourceCode, input) => {
         );
 
     } catch (error) {
+        
+         const compileError = (error.stderr || error.message)
+            .replace(
+                new RegExp(codePath.replace(/\\/g, "\\\\"), "g"),
+                "main.cpp"
+            )
+            .split("\n")
+            .filter(line => line.includes("error:"))
+            .join("\n");
 
         cleanup();
 
         return {
             success: false,
             type: "Compilation Error",
-            error: error.message
+            executionTime: 0,
+            error: compileError
         };
     }
+    // Start timer AFTER compilation
+    const startTime = Date.now();
 
     // Run Phase
     try {
@@ -69,15 +81,18 @@ export const runCpp = async (sourceCode, input) => {
             }
         );
 
+        const executionTime = Date.now() - startTime;
+
         cleanup();
 
         return {
             success: true,
-            output: stdout.trim()
+            output: stdout.trim(),
+            executionTime
         };
 
     } catch (error) {
-
+        const executionTime = Date.now() - startTime;
         cleanup();
 
         if (
@@ -86,14 +101,16 @@ export const runCpp = async (sourceCode, input) => {
         ) {
             return {
                 success: false,
-                type: "Time Limit Exceeded"
+                type: "Time Limit Exceeded",
+                executionTime
             };
         }
 
         return {
             success: false,
             type: "Runtime Error",
-            error: error.message
+            executionTime,
+            error:(error.stderr || error.message).trim()
         };
     }
 };

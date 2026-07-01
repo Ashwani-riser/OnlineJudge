@@ -33,26 +33,29 @@ export const judgeSubmission = async (submissionId) => {
 
     for (const testCase of testCases) {
 
-        const startTime = Date.now();
+        // const startTime = Date.now();
 
         const result = await runCpp(
             submission.sourceCode,
             testCase.input
         );
 
-        const endTime = Date.now();
+        // const endTime = Date.now();
 
-        const executionTime =
-            endTime - startTime;
+        // const executionTime =
+        //     endTime - startTime;
 
         maxExecutionTime = Math.max(
             maxExecutionTime,
-            executionTime
+            result.executionTime ||0
         );
 
         if (!result.success) {
-
+    
             verdict = result.type;
+            if (result.type === "Compilation Error") {
+              submission.compileError = result.error;
+            }
             break;
         }
 
@@ -66,6 +69,10 @@ export const judgeSubmission = async (submissionId) => {
             verdict = "Wrong Answer";
             break;
         }
+    }
+
+    if (verdict !== "Compilation Error") {
+    submission.compileError = null;
     }
 
     submission.verdict = verdict;
