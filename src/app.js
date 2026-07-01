@@ -12,6 +12,9 @@ import helmetMiddleware from "./middlewares/helmet.middleware.js";
 
 import morganMiddleware from "./middlewares/morgan.middleware.js";
 
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./docs/swagger.js";
+
 const app = express();
 app.disable("x-powered-by");//response ma "Express, ye header mat bhejna."
 
@@ -27,7 +30,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
-
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+);
 
 app.use("/api", apiLimiter);
 

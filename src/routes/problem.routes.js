@@ -28,7 +28,7 @@ router.get(
 
 // Single Problem
 router.get(
-    "/:id",
+    "/:slug",
     getProblemBySlug
 );
 
