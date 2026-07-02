@@ -2,6 +2,8 @@ import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { sendVerificationEmail } from "../services/email.service.js";
+import crypto from "crypto";
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -23,16 +25,38 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password
     });
+   const createdUser = await User.findById(user._id)
+        .select("-password -refreshToken -emailVerificationToken -emailVerificationTokenExpiry");
 
-    const createdUser = await User.findById(user._id)
-        .select("-password -refreshToken");
+    try {
+    await sendVerificationEmail(user);
+        } catch (error) {
+     console.error(error);
 
-    return res.status(201).json(
+     return res.status(201).json(
         new ApiResponse(
             201,
-            createdUser,
-            "User registered successfully"
+            {
+                user: createdUser,
+                isEmailVerified: false
+            },
+            "Registration successful, but verification email could not be sent. Please use resend verification."
         )
+    );
+}
+
+
+
+    return res.status(201).json(
+               new ApiResponse(
+            201,
+            {
+                user: createdUser,
+                isEmailVerified: false
+            },
+            "Registration successful. Please verify your email."
+        )
+
     );
 });
 
@@ -65,6 +89,12 @@ const loginUser = asyncHandler(async (req, res) => {
             "Invalid Credentials"
         );
     }
+    if (!user.isEmailVerified) {
+    throw new ApiError(
+        403,
+        "Please verify your email before logging in."
+    );
+}
 
     const accessToken =
         user.generateAccessToken();
@@ -100,6 +130,76 @@ const loginUser = asyncHandler(async (req, res) => {
             )
         );
 });
+const verifyEmail = asyncHandler(async (req, res) => {
+
+    const { token } = req.params;
+
+    if (!token) {
+        throw new ApiError(400, "Verification token is required");
+    }
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    const user = await User.findOne({
+        emailVerificationToken: hashedToken,
+        emailVerificationTokenExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+        throw new ApiError(
+            400,
+            "Invalid or expired verification token"
+        );
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    user.emailVerificationTokenExpiry = null;
+
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            null,
+            "Email verified successfully"
+        )
+    );
+
+});
+
+const resendVerificationEmail = asyncHandler(async (req, res) => {
+
+    const { email } = req.body;
+
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (user.isEmailVerified) {
+        throw new ApiError(400, "Email is already verified");
+    }
+
+    await sendVerificationEmail(user);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            null,
+            "Verification email sent successfully."
+        )
+    );
+
+});
 const getCurrentUser = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
@@ -115,5 +215,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 export {
     registerUser,
     loginUser,
+    verifyEmail,
+    resendVerificationEmail,
     getCurrentUser
 };

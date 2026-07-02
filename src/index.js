@@ -1,10 +1,7 @@
-import dotenv from "dotenv";
+import "dotenv/config";
+
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
-
-// import "./config/nodemailer.js";
-
-dotenv.config();
 
 connectDB()
   .then(() => {
@@ -13,5 +10,5 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.log(err);
+    console.error(err);
   });

@@ -1,52 +1,19 @@
 import { Router } from "express";
-import { registerUser ,loginUser,getCurrentUser} from "../controllers/auth.controller.js";
+import {
+    registerUser,
+    loginUser,
+    verifyEmail,
+    resendVerificationEmail,
+    getCurrentUser
+} from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authLimiter } from "../middlewares/rateLimit.middleware.js";
 const router = Router();
  
-/**
- * @swagger
- * tags:
- *   - name: Authentication
- *     description: User Authentication APIs
- */
-
-/**
- * @swagger
- * /users/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Authentication]
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - username
- *               - email
- *               - password
- *             properties:
- *               username:
- *                 type: string
- *                 example: ashwani
- *               email:
- *                 type: string
- *                 example: ashwani@gmail.com
- *               password:
- *                 type: string
- *                 example: Password@123
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Validation Error
- */
-
 router.post("/register",authLimiter, registerUser);
 router.post("/login",  authLimiter, loginUser);
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification",authLimiter,resendVerificationEmail);
 router.get("/currentUser", verifyJWT, getCurrentUser);
 
 export default router;

@@ -1,4 +1,6 @@
 import { transporter } from "../config/nodemailer.js";
+import { generateVerificationToken } from "../utils/generateVerificationToken.js";
+import { verifyEmailTemplate } from "../templates/verifyEmail.template.js";
 
 export const sendEmail = async ({ to, subject, html }) => {
     try {
@@ -16,4 +18,34 @@ export const sendEmail = async ({ to, subject, html }) => {
         console.error("❌ Email Error:", error.message);
         throw error;
     }
+};
+
+export const sendVerificationEmail = async (user) => {
+
+    const {
+        token,
+        hashedToken,
+        expiresAt
+    } = generateVerificationToken();
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationTokenExpiry = expiresAt;
+
+    await user.save({
+        validateBeforeSave: false,
+    });
+
+    const verificationUrl =
+        `${process.env.CLIENT_URL}/verify-email/${token}`;
+
+    const html = verifyEmailTemplate(
+        user.username,
+        verificationUrl
+    );
+
+    await sendEmail({
+        to: user.email,
+        subject: "Verify Your Email",
+        html,
+    });
 };
