@@ -2,7 +2,9 @@ import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { sendVerificationEmail } from "../services/email.service.js";
+import { sendVerificationEmail,sendPasswordResetEmail } from "../services/email.service.js";
+import { generatePasswordResetToken } from "../utils/generatePasswordResetToken.js";
+
 import crypto from "crypto";
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -199,6 +201,75 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
         )
     );
 
+});
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    // Find user (case-insensitive)
+    const user = await User.findOne({
+        email: email.toLowerCase(),
+    });
+
+    // Prevent Email Enumeration Attack
+    if (!user) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                null,
+                "If an account exists with this email, a password reset link has been sent."
+            )
+        );
+    }
+
+    // Generate Password Reset Token
+    const {
+        unHashedToken,
+        hashedToken,
+        tokenExpiry,
+    } = generatePasswordResetToken();
+
+    user.passwordResetToken = hashedToken;
+    user.passwordResetTokenExpiry = tokenExpiry;
+
+    await user.save({
+        validateBeforeSave: false,
+    });
+
+    try {
+        // Send Password Reset Email
+        await sendPasswordResetEmail({
+            email: user.email,
+            fullName: user.username,
+            token: unHashedToken,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                null,
+                "If an account exists with this email, a password reset link has been sent."
+            )
+        );
+    } catch (error) {
+        console.error("Forgot Password Email Error:", error);
+
+        // Rollback token if email sending fails
+        user.passwordResetToken = undefined;
+        user.passwordResetTokenExpiry = undefined;
+
+        await user.save({
+            validateBeforeSave: false,
+        });
+
+        throw new ApiError(
+            500,
+            "Failed to send password reset email. Please try again later."
+        );
+    }
 });
 const getCurrentUser = asyncHandler(async (req, res) => {
 

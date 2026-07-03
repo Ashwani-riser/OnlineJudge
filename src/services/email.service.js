@@ -1,6 +1,7 @@
 import { transporter } from "../config/nodemailer.js";
 import { generateVerificationToken } from "../utils/generateVerificationToken.js";
 import { verifyEmailTemplate } from "../templates/verifyEmail.template.js";
+import { resetPasswordTemplate } from "../templates/resetPassword.template.js";
 
 export const sendEmail = async ({ to, subject, html }) => {
     try {
@@ -46,6 +47,26 @@ export const sendVerificationEmail = async (user) => {
     await sendEmail({
         to: user.email,
         subject: "Verify Your Email",
+        html,
+    });
+};
+
+export const sendPasswordResetEmail = async ({
+    email,
+    fullName,
+    token,
+}) => {
+    const resetPasswordUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    const html = resetPasswordTemplate(
+        fullName,
+        resetPasswordUrl,
+        process.env.PASSWORD_RESET_TOKEN_EXPIRY
+    );
+
+    await sendEmail({
+        to: email,
+        subject: "Reset Your Password",
         html,
     });
 };
