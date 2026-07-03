@@ -271,6 +271,59 @@ const forgotPassword = asyncHandler(async (req, res) => {
         );
     }
 });
+const resetPassword = asyncHandler(async (req, res) => {
+    const { token } = req.params;//jo request vejta hai plain text ma url ma token
+    const { password } = req.body;
+
+    if (!token) {
+        throw new ApiError(400, "Reset token is required");
+    }
+
+    if (!password) {
+        throw new ApiError(400, "New password is required");
+    }
+
+    // Hash incoming token
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    // Find user with valid token
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetTokenExpiry: {
+            $gt: Date.now(),
+        },
+    });
+
+    if (!user) {
+        throw new ApiError(
+            400,
+            "Invalid or expired password reset token"
+        );
+    }
+
+    // Update password
+    user.password = password;
+
+    // Clear reset token
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiry = undefined;
+
+    // Logout from all devices
+    user.refreshToken = undefined;
+
+    await user.save();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            null,
+            "Password reset successful. Please login with your new password."
+        )
+    );
+});
 const getCurrentUser = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
@@ -288,5 +341,7 @@ export {
     loginUser,
     verifyEmail,
     resendVerificationEmail,
+    forgotPassword,
+    resetPassword,
     getCurrentUser
 };
