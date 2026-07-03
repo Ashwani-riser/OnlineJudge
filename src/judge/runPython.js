@@ -6,19 +6,19 @@ import { exec } from "child_process";
 
 const execAsync = promisify(exec);
 
-export const runC = async (sourceCode, input) => {
+const PYTHON_CMD = process.env.PYTHON_CMD || "python3";
 
+export const runPython = async (sourceCode, input) => {
     const jobId = crypto.randomUUID();
 
-    const tempDir = "temp";
+    const tempDir = path.join(process.cwd(), "temp");
 
     if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir);
+        fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    const codePath = path.join(tempDir, `${jobId}.c`);
+    const codePath = path.join(tempDir, `${jobId}.py`);
     const inputPath = path.join(tempDir, `${jobId}.txt`);
-    const exePath = path.join(tempDir, `${jobId}.exe`);
 
     fs.writeFileSync(codePath, sourceCode);
     fs.writeFileSync(inputPath, input);
@@ -32,53 +32,19 @@ export const runC = async (sourceCode, input) => {
             if (fs.existsSync(inputPath)) {
                 fs.unlinkSync(inputPath);
             }
-
-            if (fs.existsSync(exePath)) {
-                fs.unlinkSync(exePath);
-            }
         } catch (err) {
             console.error("Cleanup Error:", err.message);
         }
     };
 
-    // Compile Phase
-    try {
-
-        await execAsync(
-            `gcc "${codePath}" -o "${exePath}"`
-        );
-
-    } catch (error) {
-
-        const compileError = (error.stderr || error.message)
-            .replace(
-                new RegExp(codePath.replace(/\\/g, "\\\\"), "g"),
-                "main.c"
-            )
-            .split("\n")
-            .filter(line => line.includes("error:"))
-            .join("\n");
-
-        cleanup();
-
-        return {
-            success: false,
-            type: "Compilation Error",
-            executionTime: 0,
-            error: compileError
-        };
-    }
-
-    // Start timer AFTER compilation
+    // Start timer
     const startTime = Date.now();
 
-    // Run Phase
     try {
-
         const { stdout } = await execAsync(
-            `cmd /c "${exePath} < ${inputPath}"`,
+            `${PYTHON_CMD} "${codePath}" < "${inputPath}"`,
             {
-                timeout: 2000
+                timeout: 2000,
             }
         );
 
@@ -89,23 +55,39 @@ export const runC = async (sourceCode, input) => {
         return {
             success: true,
             output: stdout.trim(),
-            executionTime
+            executionTime,
         };
-
     } catch (error) {
-
         const executionTime = Date.now() - startTime;
+
+        const errorMessage = (error.stderr || error.message)
+            .replace(
+                new RegExp(codePath.replace(/\\/g, "\\\\"), "g"),
+                "main.py"
+            )
+            .trim();
 
         cleanup();
 
-        if (
-            error.killed ||
-            error.signal === "SIGTERM"
-        ) {
+        if (error.killed || error.signal === "SIGTERM") {
             return {
                 success: false,
                 type: "Time Limit Exceeded",
-                executionTime
+                executionTime,
+            };
+        }
+
+        // Python syntax-related errors are treated as compilation errors
+        if (
+            errorMessage.includes("SyntaxError") ||
+            errorMessage.includes("IndentationError") ||
+            errorMessage.includes("TabError")
+        ) {
+            return {
+                success: false,
+                type: "Compilation Error",
+                executionTime: 0,
+                error: errorMessage,
             };
         }
 
@@ -113,7 +95,7 @@ export const runC = async (sourceCode, input) => {
             success: false,
             type: "Runtime Error",
             executionTime,
-            error: (error.stderr || error.message).trim()
+            error: errorMessage,
         };
     }
 };
