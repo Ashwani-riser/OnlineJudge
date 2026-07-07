@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
 import FadeIn from "@/components/animations/FadeIn";
+import {
+  StaggerContainer,
+  StaggerItem,
+} from "@/components/animations/Stagger";
+import FloatingBlob from "@/components/animations/FloatingBlob";
+import MouseParallax from "@/components/animations/MouseParallax";
 
 import {
   ArrowRight,
@@ -13,11 +19,17 @@ export default function Hero() {
     <section className="relative flex min-h-[95vh] items-center justify-center overflow-hidden px-6 pt-20">
 
       {/* Main Glow */}
-      <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/20 blur-[140px]" />
+      <MouseParallax className="absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/20 blur-[140px]" />
+      </MouseParallax>
 
       {/* Extra Glows */}
-      <div className="absolute -left-32 top-20 h-80 w-80 rounded-full bg-violet-500/10 blur-[140px]" />
-      <div className="absolute -right-32 bottom-20 h-80 w-80 rounded-full bg-cyan-500/10 blur-[140px]" />
+     <MouseParallax className="absolute inset-0" strength={20}>
+       <FloatingBlob className="absolute -left-32 top-20 h-80 w-80 rounded-full bg-violet-500/10 blur-[140px]" />
+     </MouseParallax>
+      <MouseParallax className="absolute inset-0" strength={20}>
+        <FloatingBlob className="absolute -right-32 bottom-20 h-80 w-80 rounded-full bg-cyan-500/10 blur-[140px]" />
+      </MouseParallax>
 
       {/* Grid */}
       <div
@@ -31,32 +43,40 @@ export default function Hero() {
 
       {/* Content */}
       <FadeIn>
-      <div className="relative mx-auto max-w-5xl text-center">
+      <StaggerContainer className="relative mx-auto max-w-5xl text-center">
 
 
 
         {/* Badge */}
         
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-indigo-300 backdrop-blur-xl">
+        <StaggerItem>
+  ...     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-indigo-300 backdrop-blur-xl">
           <Sparkles className="h-4 w-4" />
           Welcome to CodeForU
         </div>
+        </StaggerItem>
+        
 
         {/* Heading */}
+        <StaggerItem>
         <h1 className="mt-8 text-5xl font-black leading-none tracking-tight md:text-7xl">
           Become a Better{" "}
           <span className="bg-gradient-to-r from-violet-400 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
             Programmer
           </span>
         </h1>
+        </StaggerItem>
 
         {/* Description */}
+        <StaggerItem>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
           Practice coding, compete in contests, improve your skills,
           and prepare for technical interviews — all in one place.
         </p>
+        </StaggerItem>
 
         {/* Buttons */}
+        <StaggerItem>
         <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
           <Button size="lg" className="h-12 rounded-xl px-8">
             Start Solving
@@ -71,8 +91,9 @@ export default function Hero() {
             Explore Contests
           </Button>
         </div>
+        </StaggerItem>
 
-      </div>
+      </StaggerContainer>
     </FadeIn>
 
       {/* Scroll Indicator */}
