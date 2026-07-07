@@ -116,15 +116,18 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
+    min-height: 100vh;
+    font-family: var(--font-sans);
   }
 }
