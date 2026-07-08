@@ -20,16 +20,13 @@ export default function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-
         {/* Logo */}
         <Link
           href="/"
           className="text-2xl font-extrabold tracking-tight"
         >
           Code
-          <span className="text-indigo-500">
-            ForU
-          </span>
+          <span className="text-indigo-500">ForU</span>
         </Link>
 
         {/* Nav Links */}
@@ -49,15 +46,18 @@ export default function Navbar() {
 
         {/* Auth */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost">
-            Login
-          </Button>
+          <Link href="/login">
+            <Button variant="ghost">
+              Login
+            </Button>
+          </Link>
 
-          <Button>
-            Sign Up
-          </Button>
+          <Link href="/signup">
+            <Button>
+              Sign Up
+            </Button>
+          </Link>
         </div>
-
       </div>
     </header>
   );
