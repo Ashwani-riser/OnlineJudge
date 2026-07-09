@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
 import { AuthLayout } from "@/components/auth";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 export default function Layout({
   children,
 }: {
   children: ReactNode;
 }) {
-  return <AuthLayout>{children}</AuthLayout>;
+  return (
+  <AuthGuard>
+    <AuthLayout>{children}</AuthLayout>
+  </AuthGuard>
+);
 }
