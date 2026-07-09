@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";//page change karna ka liya
 import { AxiosError } from "axios";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";//notification dikhat hai
+import { useForm } from "react-hook-form";//Pure form ko handle karta hai.q
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import AuthCard from "./AuthCard";
 import AuthHeader from "./AuthHeader";
 import PasswordInput from "./PasswordInput";
+import { useAuthStore } from "@/store/auth.store";
 
 import {
   loginSchema,
@@ -22,6 +23,9 @@ import { Button } from "@/components/ui/button";
 
 export default function LoginForm() {
   const router = useRouter();
+  const fetchCurrentUser = useAuthStore(
+  (state) => state.fetchCurrentUser
+);
 
   const [loading, setLoading] = useState(false);
 
@@ -41,9 +45,12 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await authService.login(data);
+     const loginResponse = await authService.login(data);
 
-      toast.success(response.message);
+// Zustand store me authenticated user load karo
+      await fetchCurrentUser();
+       console.log(useAuthStore.getState());
+      toast.success(loginResponse.message);
 
       router.push("/");
     } catch (error) {

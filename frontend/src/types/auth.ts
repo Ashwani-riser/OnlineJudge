@@ -17,12 +17,15 @@ export interface User {
   isEmailVerified: boolean;
 }
 
-export interface AuthResponse {
+export interface ApiResponse<T> {
   success: boolean;
   statusCode: number;
   message: string;
-  data: {
-    user: User;
-    isEmailVerified: boolean;
-  };
+  data: T;
 }
+
+export interface LoginResponse {
+  user: User;
+}
+
+export type MessageResponse = ApiResponse<null>;

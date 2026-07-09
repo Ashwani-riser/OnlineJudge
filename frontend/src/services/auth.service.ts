@@ -1,28 +1,55 @@
 import { api } from "./api";
+
 import type {
-  LoginPayload,
   SignupPayload,
-  AuthResponse,
+  LoginPayload,
+  User,
+  ApiResponse,
+  LoginResponse,
+  MessageResponse,
 } from "@/types/auth";
 
 class AuthService {
-  async signup(data: SignupPayload): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/register", data);
+  // Register
+  async signup(
+    data: SignupPayload
+  ): Promise<MessageResponse> {
+    const response = await api.post<MessageResponse>(
+      "/register",
+      data
+    );
+
     return response.data;
   }
 
-  async login(data: LoginPayload): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/login", data);
+  // Login
+  async login(
+    data: LoginPayload
+  ): Promise<ApiResponse<LoginResponse>> {
+    const response = await api.post<ApiResponse<LoginResponse>>(
+      "/login",
+      data
+    );
+
     return response.data;
   }
 
-  async verifyEmail(token: string): Promise<AuthResponse> {
-    const response = await api.get<AuthResponse>(`/verify-email/${token}`);
+  // Verify Email
+  async verifyEmail(
+    token: string
+  ): Promise<MessageResponse> {
+    const response = await api.get<MessageResponse>(
+      `/verify-email/${token}`
+    );
+
     return response.data;
   }
 
-  async resendVerification(email: string): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
+  // Resend Verification
+  async resendVerification(
+    email: string
+  ): Promise<MessageResponse> {
+    const response = await api.post<MessageResponse>(
       "/resend-verification",
       { email }
     );
@@ -30,8 +57,11 @@ class AuthService {
     return response.data;
   }
 
-  async forgotPassword(email: string): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
+  // Forgot Password
+  async forgotPassword(
+    email: string
+  ): Promise<MessageResponse> {
+    const response = await api.post<MessageResponse>(
       "/forgot-password",
       { email }
     );
@@ -39,11 +69,12 @@ class AuthService {
     return response.data;
   }
 
+  // Reset Password
   async resetPassword(
     token: string,
     password: string
-  ): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
+  ): Promise<MessageResponse> {
+    const response = await api.post<MessageResponse>(
       `/reset-password/${token}`,
       { password }
     );
@@ -51,8 +82,12 @@ class AuthService {
     return response.data;
   }
 
-  async getCurrentUser(): Promise<AuthResponse> {
-    const response = await api.get<AuthResponse>("/currentUser");
+  // Current User
+  async getCurrentUser(): Promise<ApiResponse<User>> {
+    const response = await api.get<ApiResponse<User>>(
+      "/currentUser"
+    );
+
     return response.data;
   }
 }
