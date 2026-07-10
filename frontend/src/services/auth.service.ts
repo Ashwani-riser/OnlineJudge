@@ -15,7 +15,7 @@ class AuthService {
     data: SignupPayload
   ): Promise<MessageResponse> {
     const response = await api.post<MessageResponse>(
-      "/register",
+      "/users/register",
       data
     );
 
@@ -27,7 +27,7 @@ class AuthService {
     data: LoginPayload
   ): Promise<ApiResponse<LoginResponse>> {
     const response = await api.post<ApiResponse<LoginResponse>>(
-      "/login",
+      "/users/login",
       data
     );
 
@@ -39,7 +39,7 @@ class AuthService {
     token: string
   ): Promise<MessageResponse> {
     const response = await api.get<MessageResponse>(
-      `/verify-email/${token}`
+      `/users/verify-email/${token}`
     );
 
     return response.data;
@@ -50,7 +50,7 @@ class AuthService {
     email: string
   ): Promise<MessageResponse> {
     const response = await api.post<MessageResponse>(
-      "/resend-verification",
+      "/users/resend-verification",
       { email }
     );
 
@@ -62,7 +62,7 @@ class AuthService {
     email: string
   ): Promise<MessageResponse> {
     const response = await api.post<MessageResponse>(
-      "/forgot-password",
+      "/users/forgot-password",
       { email }
     );
 
@@ -75,7 +75,7 @@ class AuthService {
     password: string
   ): Promise<MessageResponse> {
     const response = await api.post<MessageResponse>(
-      `/reset-password/${token}`,
+      `/users/reset-password/${token}`,
       { password }
     );
 
@@ -85,7 +85,7 @@ class AuthService {
   // Current User
   async getCurrentUser(): Promise<ApiResponse<User>> {
     const response = await api.get<ApiResponse<User>>(
-      "/currentUser"
+      "/users/currentUser"
     );
 
     return response.data;

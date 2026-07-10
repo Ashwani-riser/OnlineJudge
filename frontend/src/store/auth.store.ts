@@ -35,7 +35,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const response = await authService.getCurrentUser();
-
+      
+      console.log(response);
+      console.log(response.data);
       set({
         user: response.data,
         isAuthenticated: true,

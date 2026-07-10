@@ -39,10 +39,11 @@ export const createProblemSchema = z.object({
     .string()
     .min(1, "Sample output is required"),
 
+  // User enters: "array, dp, graph"
   tags: z
-    .array(z.string())
+    .string()
     .min(1, "At least one tag is required"),
 });
 
-export type CreateProblemFormData =
+export type CreateProblemInput =
   z.infer<typeof createProblemSchema>;
