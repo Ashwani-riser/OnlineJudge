@@ -59,10 +59,9 @@ const createProblem = asyncHandler(async (req, res) => {
 
 const getAllProblems = asyncHandler(async (req, res) => {
 
-    const problems =
-        await Problem.find()
-            .select("-__v");//mongoDB ka version field hide kar do
-
+    const problems = await Problem.find()
+    .select("title slug difficulty tags")
+     .lean();
     return res.status(200).json(
         new ApiResponse(
             200,

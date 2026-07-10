@@ -1,9 +1,35 @@
+"use client";
+
+import { useEffect } from "react";
+
+import { ProblemsHeader } from "@/components/problem/ProblemsHeader";
+import { ProblemsToolbar } from "@/components/problem/ProblemsToolbar";
+
+import { useProblemStore } from "@/store/problem.store";
+import { ProblemsTable } from "@/components/problem/ProblemsTable";
+
 export default function ProblemsPage() {
+  const {
+    problems,
+    isLoading,
+    fetchProblems,
+  } = useProblemStore();
+
+  useEffect(() => {
+    fetchProblems();
+  }, [fetchProblems]);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <h1 className="text-3xl font-bold">
-        Problems Page
-      </h1>
+    <div className="space-y-8">
+      <ProblemsHeader />
+
+      <ProblemsToolbar />
+
+      <ProblemsTable problems={problems} />
     </div>
   );
 }
