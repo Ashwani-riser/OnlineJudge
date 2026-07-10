@@ -1,4 +1,4 @@
-import { ProblemRow } from "./problemRow";
+import { ProblemRow } from "./ProblemRow";
 
 import type { Problem } from "@/types/problem";
 

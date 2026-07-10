@@ -5,3 +5,34 @@ export interface Problem {
   difficulty: "Easy" | "Medium" | "Hard";
   tags: string[];
 }
+
+export interface ProblemDetails extends Problem {
+  statement: string;
+  constraints: string;
+  inputFormat: string;
+  outputFormat: string;
+  sampleInput: string;
+  sampleOutput: string;
+}
+
+export interface CreateProblemPayload {
+  title: string;
+  slug: string;
+
+  statement: string;
+
+  difficulty: "Easy" | "Medium" | "Hard";
+
+  constraints: string;
+
+  inputFormat: string;
+  outputFormat: string;
+
+  sampleInput: string;
+  sampleOutput: string;
+
+  tags: string[];
+}
+
+export interface UpdateProblemPayload
+  extends Partial<CreateProblemPayload> {}

@@ -7,15 +7,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function ProblemsToolbar() {
+interface ProblemsToolbarProps {
+  search: string;
+  difficulty: string;
+  onSearchChange: (value: string) => void;
+  onDifficultyChange: (value: string) => void;
+}
+
+export function ProblemsToolbar({
+  search,
+  difficulty,
+  onSearchChange,
+  onDifficultyChange,
+}: ProblemsToolbarProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <Input
         placeholder="Search problems..."
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
         className="md:max-w-sm"
       />
 
-      <Select defaultValue="all">
+      <Select
+        value={difficulty}
+         onValueChange={(value) => onDifficultyChange(value ?? "all")}
+      >
         <SelectTrigger className="w-48">
           <SelectValue />
         </SelectTrigger>
