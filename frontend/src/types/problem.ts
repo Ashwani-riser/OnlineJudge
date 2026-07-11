@@ -6,6 +6,7 @@ export interface Problem {
   tags: string[];
 }
 
+
 export interface ProblemDetails extends Problem {
   statement: string;
   constraints: string;
@@ -13,6 +14,13 @@ export interface ProblemDetails extends Problem {
   outputFormat: string;
   sampleInput: string;
   sampleOutput: string;
+  createdBy?: {
+    _id?: string;
+    username: string;
+    fullName: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateProblemPayload {

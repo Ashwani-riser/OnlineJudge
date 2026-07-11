@@ -75,7 +75,9 @@ const getProblemBySlug = asyncHandler(async (req, res) => {
     const { slug } = req.params;
 
     const problem = await Problem.findOne({ slug })
-        .select("-__v");
+        .select("-__v")
+        .populate("createdBy", "username fullName")
+        .lean();
 
     if (!problem) {
         throw new ApiError(404, "Problem not found");
