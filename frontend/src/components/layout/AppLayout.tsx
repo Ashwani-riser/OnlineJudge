@@ -2,8 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { AppNavbar } from "./AppNavbar";
-import { AppSidebar } from "./AppSidebar";
+import Navbar from "./Navbar";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -13,16 +12,12 @@ export function AppLayout({
   children,
 }: AppLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <AppNavbar />
+    <div className="min-h-screen bg-background">
+      <Navbar />
 
-      <div className="flex flex-1">
-        <AppSidebar />
-
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
+      <main className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+        {children}
+      </main>
     </div>
   );
 }

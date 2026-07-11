@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/store/auth.store";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { AppNavbar } from "@/components/layout/AppNavbar";
 
 export default function ProtectedLayout({
   children,
@@ -30,9 +30,9 @@ export default function ProtectedLayout({
     return null;
   }
 
- return (
-  <AppLayout>
+return (
+  <AppNavbar>
     {children}
-  </AppLayout>
+  </AppNavbar>
 );
 }

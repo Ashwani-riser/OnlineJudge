@@ -1,13 +1,23 @@
 "use client";
 
-export function AppNavbar() {
-  return (
-    <header className="h-16 border-b bg-background px-6 flex items-center justify-between">
-      <h1 className="text-xl font-bold">CodeForU</h1>
+import type { ReactNode } from "react";
 
-      <div className="text-sm text-muted-foreground">
-        Welcome
-      </div>
-    </header>
+import Navbar from "./Navbar";
+
+interface AppNavbarProps {
+  children: ReactNode;
+}
+
+export function AppNavbar({
+  children,
+}: AppNavbarProps) {
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+
+      <main className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+        {children}
+      </main>
+    </div>
   );
 }

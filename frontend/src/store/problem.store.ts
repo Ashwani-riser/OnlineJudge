@@ -59,7 +59,8 @@ export const useProblemStore = create<ProblemState>((set) => ({
 
   try {
     const problem = await problemService.getProblemBySlug(slug);
-
+    console.log("Fetched Problem:", problem);
+    
     set({
       selectedProblem: problem,
       isLoading: false,

@@ -7,6 +7,7 @@ import { ProblemsToolbar } from "@/components/problem/ProblemsToolbar";
 import { ProblemsTable } from "@/components/problem/ProblemsTable";
 
 import { useProblemStore } from "@/store/problem.store";
+import { ProblemsList } from "@/components/problem/ProblemsList";
 
 export default function ProblemsPage() {
   const {
@@ -44,14 +45,16 @@ export default function ProblemsPage() {
     <div className="space-y-8">
       <ProblemsHeader />
 
-      <ProblemsToolbar
-        search={search}
-        difficulty={difficulty}
-        onSearchChange={setSearch}
-        onDifficultyChange={setDifficulty}
-      />
+<ProblemsToolbar
+  search={search}
+  difficulty={difficulty}
+  onSearchChange={setSearch}
+  onDifficultyChange={setDifficulty}
+/>
 
-      <ProblemsTable problems={filteredProblems} />
+<ProblemsList
+  problems={filteredProblems}
+/>
     </div>
   );
 }
