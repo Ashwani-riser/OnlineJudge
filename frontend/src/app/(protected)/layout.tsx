@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/store/auth.store";
-import { AppNavbar } from "@/components/layout/AppNavbar";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 export default function ProtectedLayout({
   children,
@@ -22,17 +22,9 @@ export default function ProtectedLayout({
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return null;
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-return (
-  <AppNavbar>
-    {children}
-  </AppNavbar>
-);
+  return <AppLayout>{children}</AppLayout>;
 }

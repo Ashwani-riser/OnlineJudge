@@ -2,7 +2,17 @@ import * as submissionService from "../services/submission.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+const runCode = asyncHandler(async (req, res) => {
+    const result = await submissionService.runCode(req.body);
 
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            result,
+            "Code executed successfully"
+        )
+    );
+});
 const createSubmission = asyncHandler(async (req, res) => {
     //  req leta hai
     //  service call karta hai
@@ -71,6 +81,7 @@ const getSubmissionById = asyncHandler(async (req, res) => {
 
 
 export {
+    runCode,
     createSubmission,
     getMySubmissions,
     getAllSubmissions,

@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import {
+    runCode,
     createSubmission,
     getMySubmissions,
     getAllSubmissions,
@@ -11,6 +12,14 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { submissionLimiter } from "../middlewares/rateLimit.middleware.js";
 
 const router = Router();
+
+// Run Code (does not save to DB)
+router.post(
+    "/run",
+    verifyJWT,
+    submissionLimiter,
+    runCode
+);
 
 // Create Practice Submission
 router.post(

@@ -2,6 +2,60 @@ import { Submission } from "../models/submission.model.js";
 import { Problem } from "../models/problem.model.js";
 import { judgeSubmission } from "../judge/judgeSubmission.js";
 import { ApiError } from "../utils/ApiError.js";
+import { runCpp } from "../judge/runCpp.js";
+import { runC } from "../judge/runC.js";
+import { runJava } from "../judge/runJava.js";
+import { runPython } from "../judge/runPython.js";
+
+
+const runCode = async (body) => {
+
+    const {
+        language,
+        sourceCode,
+        input = ""
+    } = body;
+
+   if (
+    !language ||
+    !sourceCode ||
+    sourceCode.trim() === ""
+) {
+    throw new ApiError(
+        400,
+        "Language and source code are required"
+    );
+}
+
+    const runners = {
+        c: runC,
+        cpp: runCpp,
+        java: runJava,
+        python: runPython
+    };
+
+    const runner = runners[language];
+
+    if (!runner) {
+        throw new ApiError(
+            400,
+            "Unsupported programming language"
+        );
+    }
+
+    try {
+    return await runner(
+        sourceCode,
+        input
+    );
+    } catch (error) {
+    throw new ApiError(
+        500,
+        "Failed to execute code"
+    );
+
+    }
+};
 
 
 const createSubmission = async (user, body) => {
@@ -154,6 +208,7 @@ const getSubmissionById = async (submissionId, user) => {
 };
 
 export {
+    runCode,
     createSubmission,
     getMySubmissions,
     getAllSubmissions,

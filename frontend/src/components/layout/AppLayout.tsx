@@ -12,10 +12,10 @@ export function AppLayout({
   children,
 }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background overflow-hidden">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <main className="h-[calc(100vh-5rem)] overflow-hidden px-8 py-4">
         {children}
       </main>
     </div>
