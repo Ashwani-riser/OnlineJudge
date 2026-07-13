@@ -1,16 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import axios from "axios";
 
 import { CodeEditor } from "./CodeEditor";
 import { EditorToolbar } from "./EditorToolbar";
 import { OutputPanel } from "./OutputPanel";
 
+import { Textarea } from "@/components/ui/textarea";
 import { EDITOR_TEMPLATES } from "@/constants/editorTemplates";
+import { submissionService } from "@/services/submission.service";
 
 type Language = "c" | "cpp" | "java" | "python";
 
-export function EditorPanel() {
+interface EditorPanelProps {
+  problemId: string;
+  sampleInput: string;
+}
+
+export function EditorPanel({
+  problemId,
+  sampleInput,
+}: EditorPanelProps) {
   const [language, setLanguage] =
     useState<Language>("cpp");
 
@@ -18,9 +29,14 @@ export function EditorPanel() {
     EDITOR_TEMPLATES.cpp
   );
 
-  const [output, setOutput] = useState("");
+  const [customInput, setCustomInput] =
+    useState("");
 
-  const [error, setError] = useState("");
+  const [output, setOutput] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
 
   const [
     executionTime,
@@ -42,6 +58,7 @@ export function EditorPanel() {
     newLanguage: Language
   ) => {
     setLanguage(newLanguage);
+
     setCode(
       EDITOR_TEMPLATES[newLanguage]
     );
@@ -53,34 +70,95 @@ export function EditorPanel() {
   };
 
   const handleRun = async () => {
-    setIsRunning(true);
+    try {
+      setIsRunning(true);
 
-    setOutput("");
-    setError("");
-    setVerdict("");
-    setExecutionTime(undefined);
+      setOutput("");
+      setError("");
+      setVerdict("");
+      setExecutionTime(undefined);
 
-    setTimeout(() => {
-      setOutput(
-        "Run API will be integrated in the next step."
+      const result =
+        await submissionService.runCode({
+          language,
+          sourceCode: code,
+          input:
+            customInput.trim() === ""
+              ? sampleInput
+              : customInput,
+        });
+
+      if (result.success) {
+        setOutput(result.output ?? "");
+        setVerdict(
+          "Execution Successful"
+        );
+      } else {
+        setOutput("");
+        setError(
+          result.error ??
+            "Code execution failed."
+        );
+        setVerdict(result.type ?? "");
+      }
+
+      setExecutionTime(
+        result.executionTime
       );
-
-      setExecutionTime(0);
-
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(
+          error.response?.data?.message ??
+            "Network error. Please try again."
+        );
+      } else {
+        setError("Something went wrong.");
+      }
+    } finally {
       setIsRunning(false);
-    }, 500);
+    }
   };
+    const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
+      setOutput("");
+      setError("");
+      setVerdict("");
+      setExecutionTime(undefined);
 
-    setTimeout(() => {
-      setVerdict(
-        "Submit API will be integrated next."
-      );
+      const submission =
+        await submissionService.submitSolution({
+          problemId,
+          language,
+          sourceCode: code,
+        });
 
+      setVerdict(submission.verdict);
+
+      if (submission.executionTime !== undefined) {
+        setExecutionTime(submission.executionTime);
+      }
+
+      if (submission.error) {
+        setError(submission.error);
+      }
+
+      if (submission.output) {
+        setOutput(submission.output);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(
+          error.response?.data?.message ??
+            "Failed to submit solution."
+        );
+      } else {
+        setError("Something went wrong.");
+      }
+    } finally {
       setIsSubmitting(false);
-    }, 500);
+    }
   };
 
   return (
@@ -103,14 +181,41 @@ export function EditorPanel() {
         />
       </div>
 
-      {/* Output */}
-      <div className="h-48 border-t">
-        <OutputPanel
-          output={output}
-          error={error}
-          executionTime={executionTime}
-          verdict={verdict}
-        />
+      {/* Bottom Panel */}
+      <div className="h-72 border-t flex overflow-hidden">
+        {/* Left */}
+        <div className="w-1/2 border-r flex flex-col">
+          <div className="border-b px-4 py-3">
+            <h3 className="font-semibold">
+              Custom Input
+            </h3>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              Leave empty to use sample input.
+            </p>
+          </div>
+
+          <div className="flex-1 p-3">
+            <Textarea
+              value={customInput}
+              onChange={(e) =>
+                setCustomInput(e.target.value)
+              }
+              placeholder={sampleInput}
+              className="h-full resize-none font-mono"
+            />
+          </div>
+        </div>
+
+        {/* Right */}
+        <div className="w-1/2 overflow-hidden">
+          <OutputPanel
+            output={output}
+            error={error}
+            executionTime={executionTime}
+            verdict={verdict}
+          />
+        </div>
       </div>
     </div>
   );

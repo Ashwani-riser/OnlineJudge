@@ -26,7 +26,6 @@ export function ProblemContent({
       {/* Left Panel */}
       <Panel defaultSize={45} minSize={30}>
         <div className="h-[calc(100vh-120px)] overflow-y-auto p-6">
-
           {/* Header */}
           <div className="border-b pb-6">
             <h1 className="text-3xl font-bold">
@@ -115,7 +114,6 @@ export function ProblemContent({
               </pre>
             </section>
           </div>
-
         </div>
       </Panel>
 
@@ -124,7 +122,10 @@ export function ProblemContent({
       {/* Right Panel */}
       <Panel defaultSize={55} minSize={35}>
         <div className="h-[calc(100vh-120px)]">
-          <EditorPanel />
+          <EditorPanel
+             problemId={problem._id}
+             sampleInput={problem.sampleInput}
+            />
         </div>
       </Panel>
     </PanelGroup>

@@ -20,8 +20,10 @@ export function OutputPanel({
   executionTime,
   verdict,
 }: OutputPanelProps) {
-  const isAccepted = verdict === "Accepted";
-
+  const isSuccess =
+    verdict === "Accepted" ||
+    verdict === "Success" ||
+    verdict === "Execution Successful";
   return (
     <div className="flex h-full flex-col border-t bg-card">
       {/* Header */}
@@ -47,12 +49,12 @@ export function OutputPanel({
         {verdict && (
           <div
             className={`mb-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ${
-              isAccepted
+              isSuccess
                 ? "bg-green-500/10 text-green-500"
                 : "bg-red-500/10 text-red-500"
             }`}
           >
-            {isAccepted ? (
+            {isSuccess ? (
               <CheckCircle2 className="h-4 w-4" />
             ) : (
               <XCircle className="h-4 w-4" />
@@ -63,11 +65,11 @@ export function OutputPanel({
         )}
 
         {error ? (
-          <pre className="overflow-x-auto rounded-xl border border-red-500/20 bg-red-500/10 p-4 font-mono text-sm text-red-400">
+          <pre className="overflow-x-auto rounded-xl border border-red-500/20 bg-red-500/10 p-4 font-mono text-sm text-red-400 whitespace-pre-wrap">
             {error}
           </pre>
         ) : output ? (
-          <pre className="overflow-x-auto rounded-xl border bg-muted/50 p-4 font-mono text-sm leading-6">
+          <pre className="overflow-x-auto rounded-xl border bg-muted/50 p-4 font-mono text-sm leading-6 whitespace-pre-wrap">
             {output}
           </pre>
         ) : (
@@ -79,8 +81,11 @@ export function OutputPanel({
             </h4>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              Click <span className="font-semibold">Run</span> to execute your
-              code.
+              Click{" "}
+              <span className="font-semibold">
+                Run
+              </span>{" "}
+              to execute your code.
             </p>
           </div>
         )}
